@@ -1,115 +1,169 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import { languageLabels } from "@/common/languages";
+import { useEffect, useState } from "react";
+import Select from 'react-select';
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+// Function to handle AWS Polly text-to-speech
+const speakText = async (text, voice) => {
+  try {
+
+    const response = await fetch('/api/text-to-speech', {
+      method: 'POST',
+      body: JSON.stringify({ text, voice }),
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    });
+    const data = await response.blob();
+    const audio = new Audio(URL.createObjectURL(data));
+    audio.play();
+  } catch (error) {
+    console.error('Error fetching speech:', error);
+  }
+};
+
+
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [isRecording, setIsRecording] = useState(false);
+  const [speechText, setSpeechText] = useState("");
+  const [detectedLanguage, setDetectedLanguage] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [isError, setIsError] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  let recognition;
+
+  // Initialize Speech Recognition (Web Speech API)
+  if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
+    recognition = new window.webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+  }
+
+  // Start Speech Recognition on hold
+  const startRecognition = () => {
+    if (selectedLanguage) {
+      setIsError(false);
+      if (recognition) {
+        recognition.start();
+        recognition.onresult = (event) => {
+          const transcript = event.results[event.resultIndex][0].transcript;
+          setSpeechText(transcript);
+        };
+      }
+    } else {
+      setIsError(true);
+    }
+  };
+
+  // Stop Speech Recognition and Process
+  const stopRecognition = async () => {
+    if (selectedLanguage) {
+      setIsError(false);
+      if (recognition) {
+        recognition.stop();
+        const detectedLang = await detectLanguage(speechText);
+        setDetectedLanguage(detectedLang);
+        
+        const translated = await translateText(speechText, selectedLanguage.value);
+        setTranslatedText(translated);
+        speakText(translated, selectedLanguage.voice);
+      }
+    } else {
+      setIsError(true);
+    }
+  };
+
+  // Detect Language using AWS Comprehend
+  const detectLanguage = async (text) => {
+    const response = await fetch("/api/detect-language", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const result = await response.json();
+    return result.languages[0].LanguageCode;
+  };
+
+  useEffect(() => {
+    console.log('detectedLanguage', detectedLanguage);
+  }, [detectedLanguage]);
+
+  // Translate Text using AWS Translate
+  const translateText = async (text, targetLang) => {
+    const response = await fetch("/api/translate-text", {
+      method: "POST",
+      body: JSON.stringify({ text, targetLang }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const result = await response.json();
+    return result.TranslatedText;
+  };
+
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      color: 'black',
+      
+    }),
+    control: provided => ({
+      ...provided,
+      backgroundColor: '#2b2b2b',
+      borderRadius: '0px',
+      borderColor: isError ? 'red' : '#00000000',
+      color: 'gray'
+    }),
+    singleValue: provided => ({
+      ...provided,
+      color: 'gray'
+    })
+  }
+
+  return (
+    <div className="flex flex-col gap-[5rem]" style={{ paddingTop: "45px", backgroundColor: "black", color: "white", height: "100vh" }}>
+      <div className="flex flex-col items-center gap-[2rem] h-[190px]">
+      <div className="flex justify-center">
+        <h1 className="capitalize text-[2rem] font-extrabold text-stone-400">{speechText}</h1>
+      </div>
+  
+      {speechText && translatedText ? <svg class="w-6 h-6 text-stone-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4"/>
+      </svg> : <></>}
+
+      <div className="flex justify-center">
+        <h1 className="capitalize text-[2rem] font-extrabold text-stone-400">{translatedText}</h1>
+      </div>
+      </div>
+      
+      
+<div>
+      <div className="flex justify-center">
+        {selectedLanguage && isRecording ? <div className="absolute top-[350px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
+        <button
+          className={`bg-sky-700 text-gray-600 hover:bg-sky-900 hover:text-gray-800 z-[1]`}
+          style={{ fontSize: "50px", borderRadius: "50%", padding: "20px" }}
+          onMouseDown={() => { setIsRecording(true); startRecognition(); }}
+          onMouseUp={() => { setIsRecording(false); stopRecognition(); }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7" d="M19 9v3a5.006 5.006 0 0 1-5 5h-4a5.006 5.006 0 0 1-5-5V9m7 9v3m-3 0h6M11 3h2a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="flex flex-col items-center justify-center mt-[50px]">
+        <Select
+          styles={customStyles}
+          placeholder='Translate to?'
+          className="text-left w-[50%] lg:w-[15%]"
+          value={selectedLanguage}
+          onChange={(item) => setSelectedLanguage(item)}
+          options={languageLabels}
+        />
+        {selectedLanguage && detectedLanguage ? <h1 className="text-l	font-semibold mt-[25px] duration-500 animate-bounce">Translating from {languageLabels.filter((item) => item.value === detectedLanguage)[0]?.label} to <span className="underline">{selectedLanguage.label}</span>!</h1> : <></>}
+      </div>
+      </div>
     </div>
   );
 }
+
+
