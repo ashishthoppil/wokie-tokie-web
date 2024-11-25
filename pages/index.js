@@ -81,7 +81,7 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
     });
     const result = await response.json();
-    return result.languages[0].LanguageCode;
+    return result.languages[0] ? result.languages[0].LanguageCode : 'en';
   };
 
   useEffect(() => {
