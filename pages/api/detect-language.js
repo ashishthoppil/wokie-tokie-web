@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk';
+import langdetect from 'langdetect';
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -12,18 +13,21 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { text } = req.body;
 
-    const params = {
-      Text: text,
-    };
+    console.log('testingtesting', langdetect.detect(text));
 
-    try {
-      const result = await comprehend.detectDominantLanguage(params).promise();
-      const languages = result.Languages;
 
-      res.status(200).json({ languages });
-    } catch (error) {
-      console.error("Comprehend error:", error);
-      res.status(500).json({ error: "Failed to detect language" });
-    }
+    // const params = {
+    //   Text: text,
+    // };
+
+    // try {
+    //   const result = await comprehend.detectDominantLanguage(params).promise();
+    //   const languages = result.Languages;
+
+    //   res.status(200).json({ languages });
+    // } catch (error) {
+    //   console.error("Comprehend error:", error);
+    //   res.status(500).json({ error: "Failed to detect language" });
+    // }
   }
 }
