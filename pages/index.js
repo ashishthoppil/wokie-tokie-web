@@ -83,7 +83,7 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
     });
     const result = await response.json();
-    return result.TranslatedText;
+    return result.translatedText;
   };
 
   const customStyles = {

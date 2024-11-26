@@ -1,26 +1,15 @@
-import AWS from 'aws-sdk';
+import translate from "translate";
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: 'us-east-1',
-});
-
-const translate = new AWS.Translate();
+translate.engine = "google"; 
+translate.key = "AIzaSyCCZ8PJOfeblir2dlyV9sOJrEFoJLL8yyc";
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { text, targetLang, sourceLang } = req.body;
 
-    const params = {
-      Text: unescape(encodeURIComponent(text)),
-      SourceLanguageCode: sourceLang,  // Detect the source language automatically
-      TargetLanguageCode: targetLang,  // Target language is Hindi
-    };
-
     try {
-      const translatedText = await translate.translateText(params).promise();
-      res.status(200).json(translatedText);
+      const translatedText = await translate(text, { to: targetLang, from: sourceLang });
+      res.status(200).json({ translatedText });
     } catch (error) {
       console.error("Translation error:", error);
       res.status(500).json({ error: "Failed to translate text" });
