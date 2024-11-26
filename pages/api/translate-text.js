@@ -10,7 +10,7 @@ const translate = new AWS.Translate();
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { text, targetLang } = req.body;
+    const { text, targetLang, sourceLang } = req.body;
 
     const params = {
       Text: text,

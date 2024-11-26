@@ -67,7 +67,7 @@ export default function Home() {
       if (recognition) {
         recognition.stop();
         
-        const translated = await translateText(speechText, selectedToLanguage.value);
+        const translated = await translateText(speechText, selectedToLanguage.value, selectedFromLanguage.value);
         setTranslatedText(translated);
         speakText(translated, selectedToLanguage.voice);
       }
@@ -76,23 +76,11 @@ export default function Home() {
     }
   };
 
-  // Detect Language using AWS Comprehend
-  const detectLanguage = async (text) => {
-    const response = await fetch("/api/detect-language", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-      headers: { "Content-Type": "application/json" },
-    });
-    const result = await response.json();
-    return result.languages ? result.languages[0].LanguageCode : 'en';
-  };
-
-
   // Translate Text using AWS Translate
-  const translateText = async (text, targetLang) => {
+  const translateText = async (text, targetLang, sourceLang) => {
     const response = await fetch("/api/translate-text", {
       method: "POST",
-      body: JSON.stringify({ text, targetLang }),
+      body: JSON.stringify({ text, targetLang, sourceLang }),
       headers: { "Content-Type": "application/json" },
     });
     const result = await response.json();
