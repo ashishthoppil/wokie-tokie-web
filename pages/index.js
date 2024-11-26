@@ -97,7 +97,7 @@ export default function Home() {
       body: JSON.stringify({ text, targetLang }),
       headers: { "Content-Type": "application/json" },
     });
-    alert(response);
+    alert(JSON.stringify(response));
     const result = await response.json();
     return result.TranslatedText;
   };
