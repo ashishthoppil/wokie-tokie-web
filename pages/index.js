@@ -68,6 +68,7 @@ export default function Home() {
         recognition.stop();
         
         const translated = await translateText(speechText, selectedToLanguage.value, selectedFromLanguage.value);
+        
         setTranslatedText(translated);
         speakText(translated, selectedToLanguage.voice);
       }
