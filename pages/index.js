@@ -81,7 +81,7 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
     });
     const result = await response.json();
-    return result.languages[0] ? result.languages[0].LanguageCode : 'en';
+    return result.languages ? result.languages[0].LanguageCode : 'en';
   };
 
   useEffect(() => {
@@ -107,9 +107,9 @@ export default function Home() {
     }),
     control: provided => ({
       ...provided,
-      backgroundColor: '#2b2b2b',
+      backgroundColor: '#00000000',
       borderRadius: '0px',
-      borderColor: isError ? 'red' : '#00000000',
+      borderColor: isError ? 'red' : '#161616',
       color: 'gray'
     }),
     singleValue: provided => ({
@@ -137,12 +137,15 @@ export default function Home() {
       
 <div>
       <div className="flex justify-center">
-        {selectedLanguage && isRecording ? <div className="absolute top-[350px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
+        {selectedLanguage && isRecording ? <div className="absolute top-[325px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
         <button
           className={`bg-sky-700 text-gray-600 hover:bg-sky-900 hover:text-gray-800 z-[1]`}
           style={{ fontSize: "50px", borderRadius: "50%", padding: "20px" }}
           onMouseDown={() => { setIsRecording(true); startRecognition(); }}
           onMouseUp={() => { setIsRecording(false); stopRecognition(); }}
+          onTouchStart={() => { setIsRecording(true); startRecognition(); }}
+          onTouchEnd={() => { setIsRecording(false); stopRecognition(); }}
+          onContextMenu={(event) => event.preventDefault()}
         >
           <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7" d="M19 9v3a5.006 5.006 0 0 1-5 5h-4a5.006 5.006 0 0 1-5-5V9m7 9v3m-3 0h6M11 3h2a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"/>
