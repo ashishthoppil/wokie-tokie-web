@@ -66,7 +66,7 @@ export default function Home() {
         const detectedLang = await detectLanguage(speechText);
         setDetectedLanguage(detectedLang);
         
-        const translated = await translateText(speechText, selectedLanguage.value);
+        const translated = await translateText(speechText, selectedLanguage.value) || "Unable to translate";
         setTranslatedText(translated);
         speakText(translated, selectedLanguage.voice);
       }
