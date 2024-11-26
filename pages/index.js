@@ -119,7 +119,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-[5rem]" style={{ paddingTop: "45px", backgroundColor: "black", color: "white", height: "100vh" }}>
+    <div className="select-none flex flex-col gap-[5rem]" style={{ paddingTop: "45px", backgroundColor: "black", color: "white", height: "100vh" }}>
       <div className="flex flex-col items-center gap-[2rem] h-[190px]">
       <div className="flex justify-center">
         <h1 className="capitalize text-[2rem] font-extrabold text-stone-400">{speechText}</h1>
