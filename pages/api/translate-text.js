@@ -1,7 +1,7 @@
 import translate from "translate";
 
 translate.engine = "google"; 
-translate.key = "AIzaSyCCZ8PJOfeblir2dlyV9sOJrEFoJLL8yyc";
+translate.key = process.env.GOOGLE_API_KEY;
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
