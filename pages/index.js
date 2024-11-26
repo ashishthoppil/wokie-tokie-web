@@ -1,5 +1,5 @@
 import { languageLabels } from "@/common/languages";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
 
 // Function to handle AWS Polly text-to-speech
@@ -28,6 +28,8 @@ export default function Home() {
   const [selectedFromLanguage, setSelectedFromLanguage] = useState("");
   const [selectedToLanguage, setSelectedToLanguage] = useState("");
   const [isError, setIsError] = useState(false);
+
+  const speakBtn = useRef();
 
   let recognition;
 
@@ -68,11 +70,13 @@ export default function Home() {
         const translated = await translateText(speechText, selectedToLanguage.value, selectedFromLanguage.value);
 
         setTranslatedText(translated);
-        speakText(translated, selectedToLanguage.voice);
       }
     } else {
       setIsError(true);
     }
+    setTimeout(() => {
+      speakBtn.current.click();
+    }, 1000);
   };
 
   // Translate Text using AWS Translate
@@ -146,10 +150,9 @@ export default function Home() {
         </svg> : <></>}
 
         <div className="flex justify-center">
-          <h1 className="capitalize text-[2rem] font-extrabold text-stone-400 text-center">{translatedText}</h1>
+        <h1 ref={speakBtn} onClick={() => speakText(translatedText, selectedToLanguage.voice)} className="capitalize text-[2rem] font-extrabold text-stone-400 text-center">{translatedText}</h1>
         </div>
       </div>
-      
       
       <div className="mb-[5rem]">
         <div className="flex justify-center">
