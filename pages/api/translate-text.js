@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
     const params = {
       Text: text,
-      SourceLanguageCode: 'auto',  // Detect the source language automatically
+      SourceLanguageCode: sourceLang,  // Detect the source language automatically
       TargetLanguageCode: targetLang,  // Target language is Hindi
     };
 
