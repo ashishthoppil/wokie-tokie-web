@@ -50,8 +50,6 @@ export default function Home() {
         recognition.onresult = (event) => {
           const transcript = event.results[event.resultIndex][0].transcript;
           setSpeechText(transcript);
-
-          
         };
       }
     } else {
@@ -68,7 +66,7 @@ export default function Home() {
         recognition.stop();
         
         const translated = await translateText(speechText, selectedToLanguage.value, selectedFromLanguage.value);
-        
+
         setTranslatedText(translated);
         speakText(translated, selectedToLanguage.voice);
       }

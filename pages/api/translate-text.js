@@ -13,15 +13,13 @@ export default async function handler(req, res) {
     const { text, targetLang, sourceLang } = req.body;
 
     const params = {
-      Text: text,
+      Text: unescape(encodeURIComponent(text)),
       SourceLanguageCode: sourceLang,  // Detect the source language automatically
       TargetLanguageCode: targetLang,  // Target language is Hindi
     };
 
     try {
       const translatedText = await translate.translateText(params).promise();
-      alert(translatedText);
-      alert(JSON.stringify(translatedText));
       res.status(200).json(translatedText);
     } catch (error) {
       console.error("Translation error:", error);
