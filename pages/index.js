@@ -145,9 +145,9 @@ export default function Home() {
           style={{ fontSize: "50px", borderRadius: "50%", padding: "20px" }}
           onClick={() => {
             if (isRecording) {
-              startRecognition();
-            } else {
               stopRecognition();
+            } else {
+              startRecognition();
             }
           }}
         >
