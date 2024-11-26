@@ -66,7 +66,7 @@ export default function Home() {
         const detectedLang = await detectLanguage(speechText);
         setDetectedLanguage(detectedLang);
         
-        const translated = await translateText(speechText, selectedLanguage.value) || "Unable to translate";
+        const translated = await translateText(speechText, selectedLanguage.value);
         setTranslatedText(translated);
         speakText(translated, selectedLanguage.voice);
       }
@@ -97,6 +97,7 @@ export default function Home() {
       body: JSON.stringify({ text, targetLang }),
       headers: { "Content-Type": "application/json" },
     });
+    alert(response);
     const result = await response.json();
     return result.TranslatedText;
   };
