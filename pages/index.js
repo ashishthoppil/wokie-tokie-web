@@ -164,9 +164,9 @@ export default function Home() {
       </div>
       
       
-      <div>
+      <div className="mb-[5rem]">
         <div className="flex justify-center">
-          {selectedToLanguage && isRecording ? <div className="absolute top-[325px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
+          {selectedToLanguage && isRecording ? <div className="absolute bottom-[138px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
           <button
             className={`bg-sky-700 text-gray-600 hover:bg-sky-900 hover:text-gray-800 z-[1]`}
             style={{ fontSize: "50px", borderRadius: "50%", padding: "20px" }}
