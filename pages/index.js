@@ -42,6 +42,7 @@ export default function Home() {
   // Start Speech Recognition on hold
   const startRecognition = () => {
     if (selectedLanguage) {
+      setIsRecording(!isRecording);
       setIsError(false);
       if (recognition) {
         recognition.start();
@@ -58,6 +59,7 @@ export default function Home() {
   // Stop Speech Recognition and Process
   const stopRecognition = async () => {
     if (selectedLanguage) {
+      setIsRecording(!isRecording);
       setIsError(false);
       if (recognition) {
         recognition.stop();
@@ -141,15 +143,21 @@ export default function Home() {
         <button
           className={`bg-sky-700 text-gray-600 hover:bg-sky-900 hover:text-gray-800 z-[1]`}
           style={{ fontSize: "50px", borderRadius: "50%", padding: "20px" }}
-          onMouseDown={() => { setIsRecording(true); startRecognition(); }}
-          onMouseUp={() => { setIsRecording(false); stopRecognition(); }}
-          onTouchStart={(e) => { e.preventDefault(); setIsRecording(true); startRecognition(); }}
-          onTouchEnd={(e) => { e.preventDefault(); setIsRecording(false); stopRecognition(); }}
-          onContextMenu={(event) => event.preventDefault()}
+          onClick={() => {
+            if (isRecording) {
+              startRecognition();
+            } else {
+              stopRecognition();
+            }
+          }}
         >
-          <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7" d="M19 9v3a5.006 5.006 0 0 1-5 5h-4a5.006 5.006 0 0 1-5-5V9m7 9v3m-3 0h6M11 3h2a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"/>
+          {isRecording ? 
+          <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M7 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Z"/>
           </svg>
+        : <svg class="w-[48px] h-[48px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7" d="M19 9v3a5.006 5.006 0 0 1-5 5h-4a5.006 5.006 0 0 1-5-5V9m7 9v3m-3 0h6M11 3h2a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"/>
+          </svg>}
         </button>
       </div>
 
