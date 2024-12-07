@@ -19,10 +19,12 @@ export default async function handler(req, res) {
 
   try {
     const data = await polly.synthesizeSpeech(params).promise();
-
+    // console.log('data', );
     res.setHeader('Content-Type', 'audio/mp3');
     res.setHeader('Content-Disposition', 'inline; filename="speech.mp3"');
-    res.send(data.AudioStream);
+    // res.send(data.AudioStream);
+    res.send(data.$response);
+
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate speech' });
   }

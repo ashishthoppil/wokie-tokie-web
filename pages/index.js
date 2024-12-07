@@ -12,12 +12,11 @@ const speakText = async (text, voice) => {
       body: JSON.stringify({ text, voice }),
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     });
-    const data = await response.blob();
-    alert(JSON.stringify(data));
-    const audio = new Audio(URL.createObjectURL(data));
-    // alert(audio.src);
+    alert(JSON.stringify(response));
+    // const data = await response.blob();
+    // const audio = new Audio(URL.createObjectURL(data));
 
-    audio.play();
+    // audio.play();
   } catch (error) {
     console.error('Error fetching speech:', error);
   }
