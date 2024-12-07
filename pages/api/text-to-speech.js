@@ -9,23 +9,28 @@ AWS.config.update({
 const polly = new AWS.Polly();
 
 export default async function handler(req, res) {
-  const { text, voice } = req.body;
-  const params = {
-    OutputFormat: 'mp3',
-    VoiceId: voice,
-    Text: text,
-    TextType: 'text',
-  };
-
   try {
+    const { text, voice } = req.body;
+
+    if (!text || !voice) {
+      return res.status(400).json({ error: 'Text and voice are required' });
+    }
+
+    const params = {
+      OutputFormat: 'mp3',
+      VoiceId: voice,
+      Text: text,
+      TextType: 'text',
+    };
+
     const data = await polly.synthesizeSpeech(params).promise();
-    // console.log('data', );
+
     res.setHeader('Content-Type', 'audio/mp3');
     res.setHeader('Content-Disposition', 'inline; filename="speech.mp3"');
-    // res.send(data.AudioStream);
-    res.send(data.$response);
-
+    res.send(data.AudioStream);
   } catch (error) {
+    console.error('AWS Polly Error:', error);
     res.status(500).json({ error: 'Failed to generate speech' });
   }
 }
+

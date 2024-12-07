@@ -6,19 +6,32 @@ import 'reactjs-popup/dist/index.css';
 // Function to handle AWS Polly text-to-speech
 const speakText = async (text, voice) => {
   try {
-
+    // Fetch audio data from the backend
     const response = await fetch('/api/text-to-speech', {
       method: 'POST',
       body: JSON.stringify({ text, voice }),
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     });
-    alert(JSON.stringify(response));
-    // const data = await response.blob();
-    // const audio = new Audio(URL.createObjectURL(data));
 
-    // audio.play();
+    if (!response.ok) {
+      console.log(response);
+      throw new Error('Failed to fetch audio');
+    }
+
+    // Convert response to a Blob
+    const data = await response.blob();
+
+    // Create an Audio instance and play
+    const audio = new Audio();
+    audio.src = URL.createObjectURL(data);
+
+    // Add event listener to clean up the Blob URL after playback
+    audio.onended = () => URL.revokeObjectURL(audio.src);
+
+    // Play the audio
+    await audio.play();
   } catch (error) {
-    console.error('Error fetching speech:', error);
+    console.error('Error fetching or playing speech:', error);
   }
 };
 
