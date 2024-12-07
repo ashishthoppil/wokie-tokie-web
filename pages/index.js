@@ -13,8 +13,10 @@ const speakText = async (text, voice) => {
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     });
     const data = await response.blob();
-    alert(data.size);
+    alert(data.type);
     const audio = new Audio(URL.createObjectURL(data));
+    alert(audio.src);
+
     audio.play();
   } catch (error) {
     console.error('Error fetching speech:', error);
