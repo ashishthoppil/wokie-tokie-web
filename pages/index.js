@@ -1,6 +1,7 @@
 import { languageLabels } from "@/common/languages";
 import { useEffect, useState, useRef } from "react";
-import Select from 'react-select';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 // Function to handle AWS Polly text-to-speech
 const speakText = async (text, voice) => {
@@ -15,6 +16,7 @@ const speakText = async (text, voice) => {
     const audio = new Audio(URL.createObjectURL(data));
     audio.play();
   } catch (error) {
+    alert('22');
     console.error('Error fetching speech:', error);
   }
 };
@@ -25,9 +27,10 @@ export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
   const [speechText, setSpeechText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
-  const [selectedFromLanguage, setSelectedFromLanguage] = useState("");
-  const [selectedToLanguage, setSelectedToLanguage] = useState("");
+  const [selectedFromLanguage, setSelectedFromLanguage] = useState({ key: 1, value: 'en', label: 'English', voice: 'Joanna' });
+  const [selectedToLanguage, setSelectedToLanguage] = useState({ key: 10, value: 'fr', label: 'French', voice: 'Celine' });
   const [isError, setIsError] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const speakBtn = useRef();
 
@@ -74,9 +77,6 @@ export default function Home() {
     } else {
       setIsError(true);
     }
-    setTimeout(() => {
-      speakBtn.current.click();
-    }, 1000);
   };
 
   // Translate Text using AWS Translate
@@ -90,56 +90,10 @@ export default function Home() {
     return result.translatedText;
   };
 
-  const customStyles = {
-    option: (provided, state) => ({
-      ...provided,
-      color: 'black',
-      fontSize: '13px'
-    }),
-    control: provided => ({
-      ...provided,
-      backgroundColor: '#00000000',
-      borderRadius: '0px',
-      borderColor: isError ? 'red' : '#161616',
-      color: 'gray',
-      fontSize: '13px',
-      
-    }),
-    singleValue: provided => ({
-      ...provided,
-      color: 'gray'
-    })
-  }
 
   return (
     <div className="select-none flex flex-col gap-[5rem] justify-between py-[50px] px-[10px]" style={{ paddingTop: "45px", backgroundColor: "black", color: "white", height: "100vh" }}>
-      <div className="flex flex-col items-center justify-center">
-          <div className="flex gap-5 items-center">
-            <div className="w-[50%]">
-              <div className="text-[13px] mb-2 text-center">Translate from</div>
-              <Select
-                styles={customStyles}
-                className="text-left lg:w-[15%]"
-                value={selectedFromLanguage}
-                onChange={(item) => setSelectedFromLanguage(item)}
-                options={languageLabels}
-              />
-            </div>
-            <svg class="w-6 h-6 text-gray-600 mt-[30px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/>
-            </svg>
-            <div className="w-[50%]">
-            <div className="text-[13px] mb-2 text-center">Translate to</div>
-            <Select
-              styles={customStyles}
-              className="text-left lg:w-[15%]"
-              value={selectedToLanguage}
-              onChange={(item) => setSelectedToLanguage(item)}
-              options={languageLabels}
-            />
-            </div>
-          </div>
-        </div>
+            
       <div className="flex flex-col items-center gap-[2rem] h-[190px]">
         <div className="flex justify-center">
           <h1 className="capitalize text-[2rem] font-extrabold text-stone-400 text-center">{speechText}</h1>
@@ -150,11 +104,50 @@ export default function Home() {
         </svg> : <></>}
 
         <div className="flex justify-center">
-        <h1 ref={speakBtn} onClick={() => speakText(translatedText, selectedToLanguage.voice)} className="capitalize text-[2rem] font-extrabold text-stone-400 text-center">{translatedText}</h1>
+          <h1 ref={speakBtn} onClick={() => speakText(translatedText, selectedToLanguage.voice)} className="capitalize text-[2rem] font-extrabold text-stone-400 text-center">{translatedText}</h1>
         </div>
       </div>
-      
-      <div className="mb-[5rem]">
+      <div className="flex flex-col gap-[5rem] mb-[5rem]">
+      <div className="text-gray-300">
+          <div className="flex gap-5 items-center justify-between px-5">
+          <Popup 
+                trigger={
+                  <div onClick={() => setIsOpen(true)} className="w-[40%] text-center bg-gray-900 hover:bg-gray-800 p-2 rounded-lg">
+                    {selectedFromLanguage.label}
+                  </div>}
+                arrowStyle={{ color: '#111827', borderBlockColor: '#ffffff' }}
+                contentStyle={{ backgroundColor: '#111827', padding: '10px 5px', height: '15rem', overflow: "scroll" }}
+                position="right center">
+                {languageLabels.map((language) => {
+                  return <div className="py-[5px] hover:bg-gray-700" onClick={() => {
+                    setSelectedFromLanguage(language);
+                  }}>{language.label}</div>
+                })}
+            </Popup>
+            <svg class="w-6 h-6 text-gray-300 w-[20%]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"/>
+            </svg>
+
+            <Popup 
+                trigger={
+                  <div className="w-[40%] text-center bg-gray-900 hover:bg-gray-800 p-2 rounded-lg">
+                {selectedToLanguage.label}
+            </div>}
+                arrowStyle={{ color: '#111827', borderBlockColor: '#ffffff' }}
+                contentStyle={{ backgroundColor: '#111827', padding: '10px 5px', height: '15rem', overflow: "scroll" }}
+                position="left center">
+                {languageLabels.map((language) => {
+                  return <div className="py-[5px] hover:bg-gray-700" onClick={() => {
+                    setSelectedToLanguage(language);
+                  }}>{language.label}</div>
+                })}
+            </Popup>
+
+            
+          </div>
+        </div>
+
+      <div className="">
         <div className="flex justify-center">
           {selectedToLanguage && isRecording ? <div className="absolute bottom-[138px] animate-ping bg-white h-[70px] w-[70px] rounded-full z-[0]"></div> : <></>}
           <button
@@ -177,7 +170,9 @@ export default function Home() {
             </svg>}
           </button>
         </div>
+      </div> 
       </div>
+
     </div>
   );
 }
