@@ -13,9 +13,9 @@ const speakText = async (text, voice) => {
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     });
     const data = await response.blob();
-    alert(data.type);
+    alert(JSON.stringify(data));
     const audio = new Audio(URL.createObjectURL(data));
-    alert(audio.src);
+    // alert(audio.src);
 
     audio.play();
   } catch (error) {
